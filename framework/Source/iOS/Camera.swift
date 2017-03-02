@@ -12,7 +12,7 @@ public enum PhysicalCameraLocation {
     func imageOrientation() -> ImageOrientation {
         switch self {
             case .backFacing: return .landscapeRight
-            case .frontFacing: return .landscapeLeft
+            case .frontFacing: return .portrait
         }
     }
     
@@ -151,6 +151,19 @@ public class Camera: NSObject, ImageSource, AVCaptureVideoDataOutputSampleBuffer
             captureSession.addOutput(videoOutput)
         }
         captureSession.sessionPreset = sessionPreset
+        
+        var captureConnection: AVCaptureConnection!
+        for connection in videoOutput.connections {
+            for port in (connection as AnyObject).inputPorts {
+                if (port as AnyObject).mediaType == AVMediaTypeVideo {
+                    captureConnection = connection as? AVCaptureConnection
+                }
+            }
+        }
+        if captureConnection.isVideoOrientationSupported {
+            captureConnection.videoOrientation = .portrait
+        }
+        
         captureSession.commitConfiguration()
 
         super.init()
